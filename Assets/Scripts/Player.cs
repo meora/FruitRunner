@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -14,30 +13,30 @@ public class Player : MonoBehaviour
     private float _jumpTimer;
     private bool _isGrounded = true;
 
-    private Rigidbody _rigidbody;
+    [SerializeField] private LevelSceneController _levelSceneController;
+
+    public int CollectedCoins { get; private set; } = 0;
+    [SerializeField] private Text _collectedCoinsText;
+    [SerializeField] private int _coinsToWin;
+
 
     private void Awake()
     {
         _jumpTimer = 20;
-        _rigidbody = GetComponent<Rigidbody>();
     }
 
     private void Update()
     {
+        transform.position += new Vector3(0, 0, Time.deltaTime * _speedValue);
         MoveX();
         Jump();
-    }
-
-    private void FixedUpdate()
-    {
-        _rigidbody.velocity = Vector3.forward * _speedValue;
     }
 
     private void OnTriggerEnter(Collider other)
     {
         _isGrounded = true;
 
-        if(other.TryGetComponent(out Coin coin))
+        if (other.TryGetComponent(out Coin coin))
         {
             CollectCoin();
             coin.Die();
@@ -49,13 +48,21 @@ public class Player : MonoBehaviour
         _isGrounded = false;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.TryGetComponent(out Obstacle obstacle))
+        {
+            _levelSceneController.WinGame(false);
+        }
+    }
+
     private void MoveX()
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
             _offsetX--;
 
-            if(_offsetX <= -1)
+            if (_offsetX <= -1)
             {
                 _offsetX = -1;
             }
@@ -70,7 +77,7 @@ public class Player : MonoBehaviour
             }
         }
 
-        float _offsetWeight = 2; 
+        float _offsetWeight = 2;
         Vector3 currentPosition = transform.position;
         Vector3 targetPosition = new Vector3(_offsetX * _offsetWeight, transform.position.y, transform.position.z);
         transform.position = Vector3.Lerp(currentPosition, targetPosition, Time.deltaTime * _lerpRate);
@@ -91,6 +98,12 @@ public class Player : MonoBehaviour
 
     private void CollectCoin()
     {
-        //DoSomething
+        CollectedCoins++;
+        _collectedCoinsText.text = CollectedCoins.ToString();
+
+        if(CollectedCoins >= _coinsToWin)
+        {
+            _levelSceneController.WinGame(true);
+        }
     }
 }

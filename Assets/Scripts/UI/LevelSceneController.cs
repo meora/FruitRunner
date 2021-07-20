@@ -1,33 +1,33 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CanvasGroup))]
 
-public class GameOverScreen : MonoBehaviour
+public class LevelSceneController : MonoBehaviour
 {
     [SerializeField] private Button _restartButton;
-    [SerializeField] private Button _exitApplicationButton;
     [SerializeField] private Button _loadMenuButton;
     [SerializeField] private Player _player;
+    [SerializeField] private Animator _animator;
+    [SerializeField] private CanvasGroup _levelCompletedGroup;
 
-    private CanvasGroup _gameOverGroup;
+    [SerializeField] private Text _resultScorePointText;
+    [SerializeField] private Text _endGameText;
+    [SerializeField] private Text _resultCoinsText;
+    [SerializeField] private int _scorePointsToWin;
 
     private void Awake()
     {
-        _gameOverGroup = GetComponent<CanvasGroup>();
-        _gameOverGroup.alpha = 0;
+        Time.timeScale = 1;
+        _levelCompletedGroup.alpha = 0;
     }
 
     private void Update()
     {
-        if (Time.time >= 5)
+        if (DisplayedPoints.ScorePoints >= _scorePointsToWin)
         {
-            Debug.Log(Time.time);
-            _gameOverGroup.alpha = 1;
-            Time.timeScale = 0;
+            WinGame(true);
         }
     }
 
@@ -35,25 +35,23 @@ public class GameOverScreen : MonoBehaviour
     {
         _restartButton.onClick.AddListener(OnRestartButtonClick);
         _loadMenuButton.onClick.AddListener(OnLoadMenuButtonClick);
-        _exitApplicationButton.onClick.AddListener(OnExitButtonClick);
     }
 
     private void OnDisable()
     {
         _restartButton.onClick.RemoveListener(OnRestartButtonClick);
         _loadMenuButton.onClick.RemoveListener(OnLoadMenuButtonClick);
-        _exitApplicationButton.onClick.RemoveListener(OnExitButtonClick);
     }
 
-    private void OnLostLevel()
+    public void WinGame(bool win)
     {
-        
-    }
-
-    private void OnAllCoinsCollected()
-    {
-        _gameOverGroup.alpha = 1;
+        _animator.enabled = true;
+        _levelCompletedGroup.alpha = 1;
         Time.timeScale = 0;
+        _resultScorePointText.text = "your score " + DisplayedPoints.ScorePoints.ToString();
+        _resultCoinsText.text = "your coins " + _player.CollectedCoins.ToString();
+
+        _endGameText.text = win == true ? "You win!" : "You Lost! Try Again!";
     }
 
     private void OnRestartButtonClick()
@@ -65,10 +63,5 @@ public class GameOverScreen : MonoBehaviour
     private void OnLoadMenuButtonClick()
     {
         SceneManager.LoadScene(StaticSceneNames.MenuSceneName);
-    }
-
-    private void OnExitButtonClick()
-    {
-        Application.Quit();
     }
 }
