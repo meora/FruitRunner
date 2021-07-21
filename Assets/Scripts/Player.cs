@@ -15,10 +15,11 @@ public class Player : MonoBehaviour
 
     [SerializeField] private LevelSceneController _levelSceneController;
 
-    public int CollectedCoins { get; private set; } = 0;
-    [SerializeField] private Text _collectedCoinsText;
-    [SerializeField] private int _coinsToWin;
+    public int CollectedFruits { get; private set; } = 0;
+    [SerializeField] private Text _collectedFruitsText;
+    [SerializeField] private int _fruitsToWin;
 
+    [SerializeField] private AnimatorController _animatorController;
 
     private void Awake()
     {
@@ -34,18 +35,11 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        _isGrounded = true;
-
-        if (other.TryGetComponent(out Coin coin))
+        if (other.TryGetComponent(out Fruit fruit))
         {
-            CollectCoin();
-            coin.Die();
+            CollectFruit();
+            fruit.Die();
         }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        _isGrounded = false;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -54,6 +48,17 @@ public class Player : MonoBehaviour
         {
             _levelSceneController.WinGame(false);
         }
+
+        if (collision.gameObject.TryGetComponent(out Ground ground))
+        {
+            _animatorController.Run();
+            _isGrounded = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        _isGrounded = false;
     }
 
     private void MoveX()
@@ -90,18 +95,19 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && _isGrounded == true)
         {
+            _animatorController.Jump();
             _jumpTimer = 0;
         }
 
-        transform.position = new Vector3(transform.position.x, 1f + height, transform.position.z);
+        transform.position = new Vector3(transform.position.x, 0.5f + height, transform.position.z);
     }
 
-    private void CollectCoin()
+    private void CollectFruit()
     {
-        CollectedCoins++;
-        _collectedCoinsText.text = CollectedCoins.ToString();
+        CollectedFruits++;
+        _collectedFruitsText.text = CollectedFruits.ToString();
 
-        if(CollectedCoins >= _coinsToWin)
+        if(CollectedFruits >= _fruitsToWin)
         {
             _levelSceneController.WinGame(true);
         }

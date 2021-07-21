@@ -14,8 +14,10 @@ public class LevelSceneController : MonoBehaviour
 
     [SerializeField] private Text _resultScorePointText;
     [SerializeField] private Text _endGameText;
-    [SerializeField] private Text _resultCoinsText;
+    [SerializeField] private Text _resultFruitsText;
     [SerializeField] private int _scorePointsToWin;
+
+    [SerializeField] private ParticleSystem _victoryFireWorkEffect;
 
     private void Awake()
     {
@@ -47,10 +49,10 @@ public class LevelSceneController : MonoBehaviour
     {
         _animator.enabled = true;
         _levelCompletedGroup.alpha = 1;
+        Instantiate(_victoryFireWorkEffect, _player.transform.position + Vector3.one, _victoryFireWorkEffect.transform.rotation);
         Time.timeScale = 0;
         _resultScorePointText.text = "your score " + DisplayedPoints.ScorePoints.ToString();
-        _resultCoinsText.text = "your coins " + _player.CollectedCoins.ToString();
-
+        _resultFruitsText.text = "your fruits " + _player.CollectedFruits.ToString();
         _endGameText.text = win == true ? "You win!" : "You Lost! Try Again!";
     }
 
